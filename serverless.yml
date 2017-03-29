@@ -56,6 +56,7 @@ provider:
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-parser
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-add-activity
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-test
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-list*
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -79,6 +80,8 @@ provider:
 functions:
   test:
     handler: test.handler
+  list-members:
+    handler: commands/list-members.handler
   add-activity:
     handler: commands/add-activity.handler
   parser:

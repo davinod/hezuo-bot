@@ -5,7 +5,7 @@ var AWS = require('aws-sdk');
 var lambda = new AWS.Lambda();
 var slackRequest ;
 
-const log = (event) => console.log('Event', JSON.stringify(event, null, 2));
+const log = event => console.log('Event', JSON.stringify(event, null, 2));
 
 // *************************************************************** //
 //  Function to invoke the parser to evaluate the command received //
@@ -29,8 +29,17 @@ const invokeParser = (event) => {
 //  Function to invoke the dynamic lambda returned by the parser  //
 // ************************************************************** //
 const invokeAction = (event) => {
-    if (!event) return null;
     console.log('============  invokeAction start ==============');
+    //console.log('event is ', event);
+    //console.log('payload is ', event.Payload);
+    //console.log('errorMessage is ', JSON.parse(event.Payload).errorMessage);
+
+    if (!event) return null;
+    
+    //It may happen that the parser had an exception because the command was not parsed, this is to
+    //ensure the command is not invoked. Somehow, the catch in the main function is not being triggered
+    //Just keep this if for now
+    if (JSON.parse(event.Payload).errorMessage) throw new Error (JSON.parse(event.Payload).errorMessage);
     
     var command = JSON.parse(event.Payload).command;
     console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with payload ', event);
@@ -50,6 +59,8 @@ const invokeAction = (event) => {
 const sendResponse = (event, err) => {
 
     console.log('============ sendResponse ==============');
+    //console.log('event is ', event);
+    //console.log('err is ', err);
     
     const params = {
         token: slackRequest.team.bot.bot_access_token,
@@ -61,7 +72,7 @@ const sendResponse = (event, err) => {
 
     const url = `https://slack.com/api/chat.postMessage?${qs.stringify(params)}`;
     console.log(`Requesting ${url}`);
-    return fetch(url)
+    fetch(url)
         .then(response => response.json())
         .then((response) => {
             if (!response.ok) throw new Error('SlackAPIError');
