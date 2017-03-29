@@ -80,7 +80,7 @@ functions:
   test:
     handler: test.handler
   add-activity:
-    handler: add-activity.handler
+    handler: commands/add-activity.handler
   parser:
     handler: parser.handler
   actions:

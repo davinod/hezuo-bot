@@ -31,9 +31,9 @@ const invokeParser = (event) => {
 const invokeAction = (event) => {
     if (!event) return null;
     console.log('============  invokeAction start ==============');
-    console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with payload ', event);
-
+    
     var command = JSON.parse(event.Payload).command;
+    console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with payload ', event);
 
     //Return a promise of the lambda command invoked
     return lambda.invoke({
