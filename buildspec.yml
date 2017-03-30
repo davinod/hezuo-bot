@@ -7,5 +7,3 @@ phases:
   build:
     commands:
       - sls deploy
-  discard-paths: yes
-  base-directory: location
