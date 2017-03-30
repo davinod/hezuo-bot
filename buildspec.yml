@@ -1,11 +1,9 @@
-phases: 
-  base-directory: location
-  build: 
-    commands: 
-      - "sls deploy"
-  discard-paths: true
-  pre_build: 
-    commands: 
-      - "npm install"
 version: 0.1
 
+phases:
+  pre_build:
+    commands:
+      - npm install
+  build:
+    commands:
+      - sls deploy
