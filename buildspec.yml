@@ -2,7 +2,7 @@ version: 0.1
 
 environment_variables:
   plaintext:
-    ENVIRONMENT:$ENV_TYPE 
+    MY_ENV: $ENV_TYPE 
 
 phases:
   pre_build:
@@ -19,4 +19,4 @@ phases:
     commands: 
       - echo Build completed on `date`
       - MESSAGE=$(cat deploy.log | sed "s/\"/\'/g")
-      - aws sns publish --topic-arn $SNS_TOPIC_ARN --subject 'AWS CodeBuild - Hezuo - ENV="$ENV_TYPE",ENVIRONMENT="$ENVIRONMENT" - Build Completed' --message '"$MESSAGE"' 
+      - aws sns publish --topic-arn "$SNS_TOPIC_ARN" --subject 'AWS CodeBuild - Hezuo - ENV="$ENV_TYPE",MY_ENV="$MY_ENV" - Build Completed' --message '"$MESSAGE"' 
