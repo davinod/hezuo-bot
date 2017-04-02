@@ -18,4 +18,4 @@ phases:
       - echo Build completed on `date`
       - export SUBJECT="Hezuo Code Build Complete ENV=$ENV_TYPE"
       - export MESSAGE=$(<deploy.log)
-      - ~/hezuo-builder/publish.py
+      - python ~/hezuo-builder/publish.py
