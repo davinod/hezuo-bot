@@ -28,13 +28,13 @@ provider:
   region: ap-southeast-2
   environment:
     APP_NAME: ${self:service}
-    CLIENT_ID: '157101368513.159794061927'
-    CLIENT_SECRET: '0f2f97078a2b830b78f1d7b2bce3bf42'
+    CLIENT_ID: ${env:SLACK_APP_CLIENT_ID}
+    CLIENT_SECRET: ${env:SLACK_APP_CLIENT_SECRET} 
     INSTALL_SUCCESS_URL: https://s3-ap-southeast-2.amazonaws.com/aws-davidiog-syd-hezuo/static/success.html
     INSTALL_ERROR_URL: https://s3-ap-southeast-2.amazonaws.com/aws-davidiog-syd-hezuo/static/error.html
     NAMESPACE: ${self:custom.namespace}
     SLACK_TABLE: ${self:custom.namespace}-slack-bot
-    VERIFICATION_TOKEN: 'nE5UYmMCaQGEFnNnZZqMZXha'
+    VERIFICATION_TOKEN: ${env:SLACK_APP_VERIFICATION_TOKEN}
     TEAMS_TABLE: ${self:custom.namespace}-teams
     MEMBERS_TABLE: ${self:custom.namespace}-members
     ACTIVITY_TABLE: ${self:custom.namespace}-activity
