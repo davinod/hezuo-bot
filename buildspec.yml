@@ -9,6 +9,7 @@ phases:
       - echo Build started on `date`
       - sls deploy | tee deploy.log
   post_build:
+    commands: 
       - echo Build completed on `date`
       - MESSAGE=$(cat eploy.log | sed "s/\"/\'/g")
       - aws sns publish --topic-arn $SNS_TOPIC_ARN --subject 'AWS CodeBuild - Hezuo - ENV=$ENV_TYPE - Build Completed' --message '$MESSAGE' 
