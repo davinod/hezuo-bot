@@ -8,6 +8,7 @@ phases:
       - echo "ENV_TYPE=$ENV_TYPE"
       - echo "SNS_TOPIC_ARN=$SNS_TOPIC_ARN"
       - echo "REGION=$REGION"
+      - echo "AWS_REGION=$AWS_REGION"
   build:
     commands:
       - echo Build started on `date`
@@ -17,4 +18,4 @@ phases:
       - echo Build completed on `date`
       - export SUBJECT="Hezuo Code Build Complete ENV=$ENV_TYPE"
       - export MESSAGE=$(<deploy.log)
-      - ~/hezuo-build/publish.py
+      - ~/hezuo-builder/publish.py
