@@ -4,6 +4,14 @@ phases:
   pre_build:
     commands:
       - npm install
+      - echo "Arguments received:"
+      - echo "ENV_TYPE=$ENV_TYPE"
+      - echo "SNS_TOPIC_ARN=$SNS_TOPIC_ARN"
   build:
     commands:
-      - sls deploy
+      - echo Build started on `date`
+      - sls deploy | tee /tmp/hezuo-builder/deploy.log
+  post_build:
+    commands: 
+      - echo Build completed on `date`
+      - python /tmp/hezuo-builder/publish.py
