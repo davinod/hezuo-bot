@@ -37,6 +37,7 @@ provider:
     VERIFICATION_TOKEN: ${env:SLACK_APP_VERIFICATION_TOKEN}
     TEAMS_TABLE: ${self:custom.namespace}-teams
     MEMBERS_TABLE: ${self:custom.namespace}-members
+    DEVELOPERS_TABLE: ${self:custom.namespace}-developers
     ACTIVITY_TABLE: ${self:custom.namespace}-activity
     CEU_TABLE: ${self:custom.namespace}-ceu
 
@@ -51,6 +52,7 @@ provider:
       Resource: 
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.SLACK_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.DEVELOPERS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
@@ -84,8 +86,8 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  test:
-    handler: test.handler
+  list-developers:
+    handler: commands/list-developers.handler
   list-members:
     handler: commands/list-members.handler
   add-activity:
@@ -139,7 +141,7 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    HezuoMemberDynamoDbTable:
+    HezuoMembersDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.MEMBERS_TABLE}
@@ -152,7 +154,20 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    HezuoTeamDynamoDbTable:
+    HezuoDevelopersDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DEVELOPERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    HezuoTeamsDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.TEAMS_TABLE}

@@ -7,12 +7,12 @@ var rawCommand, command, response;
 
 const getCommand = text => /^<@[A-X0-9]*>(.+)/.exec(text)[1].trim();
 
-/*const aList = ['list', 'display', 'show', 'fetch'];
-const aAdd = ['add', 'create', 'include'];
-const aRemove = ['remove', 'delete', 'terminate'];
-const aMembers = ['member', 'members', 'user', 'users', 'person'] ;*/
+// ************************
+// parseListMembers
+// Author: Davi
+// ************************
 
-const parseListTeams = () => {
+const parseListMembers = () => {
     
     //console.log('2 - command is ', command);
 
@@ -38,6 +38,47 @@ const parseListTeams = () => {
         }
     };
 };
+
+// ************************
+// parseListDevelopers
+// Author: Davi
+// ************************
+
+const parseListDevelopers = () => {
+    
+    //console.log('2 - command is ', command);
+
+    //Assure that this is the right command
+    const words = command.split(' ');
+    const action = words[0];
+    const resource = words[1];
+
+    if (action !== "list" || resource !== 'developers')
+        throw new Error ('Bad implementation for command parseListTeams');
+
+    response = {
+        command: {
+            commandLine: command,
+            action: action,
+            resource: resource,
+            api: 'list-developers',
+            params: [],
+            response: {
+                success: "$output",
+                error: "error to perform your command. Use list commands to see what I can do for ya.",
+            }
+        }
+    };
+};
+
+
+// ********************************************
+// Parser
+// 
+// Desc  : Responsible to parse commands
+// Author: Davi
+//
+// ********************************************
 
 module.exports.handler = (event, context, callback) => {
     log(event);
@@ -70,11 +111,19 @@ module.exports.handler = (event, context, callback) => {
         if (action === 'list' && resource === 'members') {
             //console.log('calling the promise');
             Promise.resolve()
-                .then(parseListTeams)
+                .then(parseListMembers)
                 .then(event = Object.assign(event, response))
                 .then((event) => callback(null, response))  //Success
                 .catch((err) =>  callback(sendResponse(null, err))); //Error
-        } else
+        } else if (action === 'list' && resource === 'developers') {
+            //console.log('calling the promise');
+            Promise.resolve()
+                .then(parseListDevelopers)
+                .then(event = Object.assign(event, response))
+                .then((event) => callback(null, response))  //Success
+                .catch((err) =>  callback(sendResponse(null, err))); //Error
+        }
+        else
         { 
             //Command not found
             callback (new Error ('I dont understand this command. Use list commands to see what I can do for ya.'));
@@ -82,7 +131,6 @@ module.exports.handler = (event, context, callback) => {
     } else {
         //console.log('1 word command found. But not supported.');
         //Later, we can develop other simple commands with one word
-        callback (new Error('command ' + command + ' is not supported'));
-        
+        callback (new Error('command ' + command + ' is not supported. Use list commands to see what I can do for ya.'));
     }
 };
