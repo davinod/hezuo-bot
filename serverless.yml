@@ -46,8 +46,14 @@ provider:
       Action:
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:Scan
+        - dynamodb:Query
       Resource: 
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.SLACK_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
     - Effect: Allow
       Action:
         - lambda:invokeFunction
@@ -153,13 +159,9 @@ resources:
         AttributeDefinitions:
           - AttributeName: team_name
             AttributeType: S
-          - AttributeName: username
-            AttributeType: S
         KeySchema:
           - AttributeName: team_name
             KeyType: HASH
-          - AttributeName: username
-            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
