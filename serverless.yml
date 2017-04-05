@@ -139,7 +139,7 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    HezuoMembersDynamoDbTable:
+    HezuoMemberDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.MEMBERS_TABLE}
@@ -152,7 +152,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    HezuoTeamsDynamoDbTable:
+    HezuoTeamDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.TEAMS_TABLE}
