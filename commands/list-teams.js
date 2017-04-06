@@ -37,7 +37,7 @@ function formatError(error) {
 
 function formatResponse(response) {
     console.log("Got messages " + response);
-    return "```Hezuo Teams List: " + response['results'].join(", ") + "```";
+    return "```Hezuo Teams List: " + response['results'].sort().join(", ") + "```";
 }
 
 exports.handler = (event, context, callback) => {

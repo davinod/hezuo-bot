@@ -49,6 +49,8 @@ provider:
         - dynamodb:PutItem
         - dynamodb:Scan
         - dynamodb:Query
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
       Resource:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.SLACK_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}
@@ -56,7 +58,7 @@ provider:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
-        - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TEAM_INDEX}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}/index/${self:provider.environment.MEMBERS_TEAM_INDEX}
     - Effect: Allow
       Action:
         - lambda:invokeFunction
@@ -67,6 +69,7 @@ provider:
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-list*
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-remove*
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-add*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-update*
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -98,6 +101,10 @@ functions:
     handler: commands/add-team.handler
   update-member-team:
     handler: commands/update-member-team.handler
+  remove-team:
+    handler: commands/remove-team.handler
+  remove-member:
+    handler: commands/remove-member.handler
   add-activity:
     handler: commands/add-activity.handler
   parser:
@@ -161,8 +168,6 @@ resources:
         KeySchema:
           - AttributeName: username
             KeyType: HASH
-          - AttributeName: teamname
-            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

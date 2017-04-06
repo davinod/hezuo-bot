@@ -1,5 +1,5 @@
 // ***********
-// add-team
+// add-team teamname
 // ***********
 
 const AWS = require('aws-sdk');
@@ -9,12 +9,11 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 function addTeam(team_name, response) {
  var params = {
   Item: {
-   "team_name": team_name,
-   "username": "placeholder"
+   "teamname": team_name
   },
   TableName: process.env.TEAMS_TABLE,
   Expected: {
-      team_name: {
+      teamname: {
           Exists: false
       }
   }

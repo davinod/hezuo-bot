@@ -71,80 +71,40 @@ const parseListDevelopers = () => {
     };
 };
 
-const parseListTeams = () => {
+const apiProxy = () => {
+  const words = command.split(' ');
+  const action = words[0];
+  const resource = words[1];
+  var api = null;
 
-    //console.log('2 - command is ', command);
+  if (action == "list" && resource == 'teams') {
+    api = "list-teams"
+  } else if (action == "add" && resource == 'team') {
+    api = "add-team"
+  } else if (action == "update" && resource == 'member-team') {
+    api = "update-member-team"
+  } else if (action == "remove" && resource == 'team') {
+    api = "remove-team"
+  } else if (action == "remove" && resource == 'member') {
+    api = "remove-member"
+  } else {
+    throw new Error ('Bad implementation for command parser - ' + command);
+  }
 
-    //Assure that this is the right command
-    const words = command.split(' ');
-    const action = words[0];
-    const resource = words[1];
-
-    if (action !== "list" || resource !== 'teams')
-        throw new Error ('Bad implementation for command parseListTeams');
-
-    response = {
-        command: {
-            commandLine: command,
-            action: action,
-            resource: resource,
-            api: 'list-teams',
-            params: [],
-            response: {
-                success: "$output",
-                error: "error to perform your command. Use list commands to see what I can do for ya.",
-            }
-        }
-    };
-};
-
-const addTeam = () => {
-
-    const words = command.split(' ');
-    const action = words[0];
-    const resource = words[1];
-
-    if (action !== "add" || resource !== 'team')
-        throw new Error ('Bad implementation for command addTeam');
-
-    response = {
-        command: {
-            commandLine: command,
-            action: action,
-            resource: resource,
-            api: 'add-team',
-            params: words.slice(2),
-            response: {
-                success: "$output",
-                error: "error to perform your command. Use list commands to see what I can do for ya.",
-            }
-        }
-    };
-};
-
-const updateMemberTeam = () => {
-
-    const words = command.split(' ');
-    const action = words[0];
-    const resource = words[1];
-
-    if (action !== "update" || resource !== 'member-team')
-        throw new Error ('Bad implementation for command updateMemberTeam');
-
-    response = {
-        command: {
-            commandLine: command,
-            action: action,
-            resource: resource,
-            api: 'update-member-team',
-            params: words.slice(2),
-            response: {
-                success: "$output",
-                error: "error to perform your command. Use list commands to see what I can do for ya.",
-            }
-        }
-    };
-};
+  response = {
+      command: {
+          commandLine: command,
+          action: action,
+          resource: resource,
+          api: api,
+          params: words.slice(2),
+          response: {
+              success: "$output",
+              error: "error to perform your command. Use list commands to see what I can do for ya.",
+          }
+      }
+  };
+}
 
 // ********************************************
 // Parser
@@ -188,13 +148,16 @@ module.exports.handler = (event, context, callback) => {
         if (action === 'list' && resource === 'members') {
           resolver = parseListMembers;
         } else if (action === 'list' && resource === 'teams') {
-          resolver = parseListTeams;
+          resolver = apiProxy;
         } else if (action === 'add' && resource === 'team') {
-          resolver = addTeam;
-        } else if (action === 'add' && resource === 'team-member') {
-          resolver = addTeamMember;
+          resolver = apiProxy;
+        } else if (action === 'update' && resource === 'member-team') {
+          resolver = apiProxy;
+        } else if (action === 'remove' && resource === 'team') {
+          resolver = apiProxy;
+        } else if (action === 'remove' && resource === 'member') {
+          resolver = apiProxy;
         } else {
-            //Command not found
             callback (new Error ("I dont understand this command `" + command + "`. Use `list commands` to get all valid command list"));
         }
 
