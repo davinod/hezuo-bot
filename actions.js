@@ -35,12 +35,12 @@ const invokeAction = (event) => {
     //console.log('errorMessage is ', JSON.parse(event.Payload).errorMessage);
 
     if (!event) return null;
-    
+
     //It may happen that the parser had an exception because the command was not parsed, this is to
     //ensure the command is not invoked. Somehow, the catch in the main function is not being triggered
     //Just keep this if for now
     if (JSON.parse(event.Payload).errorMessage) throw new Error (JSON.parse(event.Payload).errorMessage);
-    
+
     var command = JSON.parse(event.Payload).command;
     console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with payload ', event);
 
@@ -61,11 +61,12 @@ const sendResponse = (event, err) => {
     console.log('============ sendResponse ==============');
     //console.log('event is ', event);
     //console.log('err is ', err);
-    
+    var command = slackRequest.slack.event.text;
+
     const params = {
         token: slackRequest.team.bot.bot_access_token,
         channel: slackRequest.slack.event.channel,
-        text: err ? err.message : 'Hey <@' + slackRequest.slack.event.user + '>, ' + event.Payload.replace(/['"]+/g, ''),
+        text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + event.Payload.replace(/^['"]/g, '').replace(/['"]$/g, '') + "\n"
     };
 
     console.log('message is ', params.text);

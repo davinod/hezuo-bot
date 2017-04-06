@@ -3,7 +3,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 // ********************************************
 // list-members
-// 
+//
 // Desc  : Return the Hezuo-bot Members
 // Author: Davi
 //
@@ -18,11 +18,11 @@ exports.handler = (event, context, callback) => {
     };
 
     console.log("Scanning ", process.env.MEMBERS_TABLE);
-    
+
     dynamodb.scan(params, function(err, data) {
         if (err)
             throw new Error (err);
-    
+
 
         console.log("Scan succeeded.");
 

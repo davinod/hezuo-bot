@@ -7,10 +7,10 @@ var rawCommand, command, response;
 
 const getCommand = text => /^<@[A-X0-9]*>(.+)/.exec(text)[1].trim();
 
-// ************************
-// parseListMembers
-// Author: Davi
-// ************************
+/*const aList = ['list', 'display', 'show', 'fetch'];
+const aAdd = ['add', 'create', 'include'];
+const aRemove = ['remove', 'delete', 'terminate'];
+const aMembers = ['member', 'members', 'user', 'users', 'person'] ;*/
 
 const parseListMembers = () => {
 
@@ -22,7 +22,7 @@ const parseListMembers = () => {
     const resource = words[1];
 
     if (action !== "list" || resource !== 'members')
-        throw new Error ('Bad implementation for command parseListTeams');
+        throw new Error ('Bad implementation for command parseListMembers');
 
     response = {
         command: {
@@ -30,38 +30,6 @@ const parseListMembers = () => {
             action: action,
             resource: resource,
             api: 'list-members',
-            params: [],
-            response: {
-                success: "$output",
-                error: "error to perform your command. Use list commands to see what I can do for ya.",
-            }
-        }
-    };
-};
-
-// ************************
-// parseListDevelopers
-// Author: Davi
-// ************************
-
-const parseListDevelopers = () => {
-
-    //console.log('2 - command is ', command);
-
-    //Assure that this is the right command
-    const words = command.split(' ');
-    const action = words[0];
-    const resource = words[1];
-
-    if (action !== "list" || resource !== 'developers')
-        throw new Error ('Bad implementation for command parseListTeams');
-
-    response = {
-        command: {
-            commandLine: command,
-            action: action,
-            resource: resource,
-            api: 'list-developers',
             params: [],
             response: {
                 success: "$output",
@@ -122,21 +90,21 @@ const addTeam = () => {
     };
 };
 
-const updateMemberTeam = () => {
+const addTeamMember = () => {
 
     const words = command.split(' ');
     const action = words[0];
     const resource = words[1];
 
-    if (action !== "update" || resource !== 'member-team')
-        throw new Error ('Bad implementation for command updateMemberTeam');
+    if (action !== "add" || resource !== 'team-member')
+        throw new Error ('Bad implementation for command addTeamMember');
 
     response = {
         command: {
             commandLine: command,
             action: action,
             resource: resource,
-            api: 'update-member-team',
+            api: 'add-team-member',
             params: words.slice(2),
             response: {
                 success: "$output",
@@ -145,14 +113,6 @@ const updateMemberTeam = () => {
         }
     };
 };
-
-// ********************************************
-// Parser
-//
-// Desc  : Responsible to parse commands
-// Author: Davi
-//
-// ********************************************
 
 module.exports.handler = (event, context, callback) => {
     log(event);
@@ -166,7 +126,6 @@ module.exports.handler = (event, context, callback) => {
     //console.log('1 - rawCommand is ', rawCommand);
     //console.log('1 - command is ', command);
 
-    //Check if it is a 2 word command, by looking for a white space after trim()
     if (command.indexOf(' ') > 0){
 
         //Split the command and isolate the two first words (action and resource)
@@ -181,7 +140,6 @@ module.exports.handler = (event, context, callback) => {
         //Check the action/resource and invoke the specific function
         //For new commands, please add another item to the case below resolving to your command
         //Please dont use synonyms. In order to make things simpler, parser only translate the exact command
-
 
         var resolver = null;
 
@@ -206,6 +164,7 @@ module.exports.handler = (event, context, callback) => {
     } else {
         //console.log('1 word command found. But not supported.');
         //Later, we can develop other simple commands with one word
-        callback (new Error('command ' + command + ' is not supported. Use list commands to see what I can do for ya.'));
+        callback (new Error('command ' + command + ' is not supported'));
+
     }
 };
