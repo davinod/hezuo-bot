@@ -64,6 +64,7 @@ const sendResponse = (event, err) => {
     var command = slackRequest.slack.event.text;
 
     const params = {
+        mrkdwn: true,
         token: slackRequest.team.bot.bot_access_token,
         channel: slackRequest.slack.event.channel,
         text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + event.Payload.replace(/^['"]/g, '').replace(/['"]$/g, '') + "\n"
@@ -105,3 +106,4 @@ module.exports.handler = (event, context, callback) => {
         .catch((err) =>  callback(sendResponse(null, err))); //Error
 
 };
+
