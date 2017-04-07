@@ -7,6 +7,7 @@ const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 function removeMember(member_name, response) {
+ var deferred = Promise.defer();
 
  var params = {
   Key: {
@@ -20,14 +21,16 @@ function removeMember(member_name, response) {
  };
 
  console.log("Trying to remove member ", member_name);
- return docClient.delete(params, function(err, data) {
+ docClient.delete(params, function(err, data) {
    if (err) {
        response['error'] = err;
        console.log(err, err.stack);
    } else {
        response['results'] = ["Successfully removed member - " + member_name]
    }
- }).promise();
+   deferred.resolve()
+ });
+ return deferred.promise;
 }
 
 function formatError(error) {
@@ -49,6 +52,7 @@ exports.handler = (event, context, callback) => {
     var response = {results: [], error: null, members: null}
 
     var member_name = event.params[0];
+
     console.log("Removing member - ", member_name);
 
     return Promise.resolve(member_name)

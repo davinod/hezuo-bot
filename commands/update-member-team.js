@@ -9,19 +9,8 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 function updateMemberTeam(team_name, member_name, response) {
 
      console.log("Existing status : ", response);
-     if (response['team_exists'] == false) {
-       response['error'] = "Invalid team name mentioned. Use `list teams` to verify."
-       return Promise.resolve(response);
-     }
-
-     if (response['member_exists'] == false) {
-       response['error'] = "Invalid member mentioned. Use `list members` to verify."
-       return Promise.resolve(response);
-     }
-
-     if (response['already_member'] == true) {
-       response['error'] = "Member is already part of the team. Use `list members " + team_name + "` to verify";
-       return Promise.resolve(response);
+     if (response['errors'].length > 0) {
+       return
      }
 
     var params = {
@@ -34,14 +23,17 @@ function updateMemberTeam(team_name, member_name, response) {
       }
     };
 
-    return docClient.update(params, function(err, data) {
+    var deferred = Promise.defer();
+    docClient.update(params, function(err, data) {
        if (err) {
            response['error'] = err;
            console.log(err, err.stack);
        } else {
            response['results'] = ["Successfully updated team as `" + team_name + "` for user `" + member_name + "`"]
        }
-    }).promise();
+       deferred.resolve()
+    });
+    return deferred.promise;
 }
 
 function formatError(error) {
@@ -50,8 +42,8 @@ function formatError(error) {
 }
 
 function formatResponse(response, member_name, team_name) {
-    if (response['error']) {
-      return "Error while adding the member to team - " + response['error']
+    if (response['errors'].length > 0) {
+      return "Error while adding the member to team - " + response['errors'].join(" ")
     }
     console.log("Successfully added member to team - ", response['results']);
     return response['results'].join(". ") + ". Run `describe user " + member_name + "` to get updated information"
@@ -65,14 +57,17 @@ function memberExists(member_name, team_name, response) {
     }
   };
 
-  return docClient.get(params, function(err, data) {
+  var deferred = Promise.defer();
+  docClient.get(params, function(err, data) {
     if (err || typeof data.Item == 'undefined') {
       if (err) console.error(err);
-      response['member_exists'] = false;
+      response['errors'].push("Invalid member ```" + member_name + "```.");
     } else if (data.Item.teamname == team_name) {
-      response['already_member'] = true;
+      response['errors'].push("```" + member_name + "``` is already part of ```" + team_name + "```");
     }
-  }).promise();
+    deferred.resolve()
+  });
+  return deferred.promise;
 }
 
 function teamExists(team_name, response) {
@@ -88,18 +83,21 @@ function teamExists(team_name, response) {
     }
   };
 
-  return docClient.get(params, function(err, data) {
+  var deferred = Promise.defer()
+  docClient.get(params, function(err, data) {
     if (err || typeof data.Item == 'undefined') {
       if (err) console.error(err);
-      response['team_exists'] = false;
+      response['errors'].push("Invalid team ```" + team_name + "```.");
     }
-  }).promise();
+    deferred.resolve()
+  });
+  return deferred.promise;
 }
 
 exports.handler = (event, context, callback) => {
     console.log(event);
 
-    var response = {results: [], error: null, team_exists: true, member_exists: true}
+    var response = {results: [], errors: [], team_exists: true, member_exists: true}
 
     var team_name = event.params[1];
     var member_name = event.params[0];
