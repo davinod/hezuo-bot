@@ -20,7 +20,7 @@ function updateMemberTeam(team_name, member_name, response) {
      }
 
      if (response['already_member'] == true) {
-       response['error'] = "Member is already part of the team. Use `list team-members " + team_name + "` to verify";
+       response['error'] = "Member is already part of the team. Use `list members " + team_name + "` to verify";
        return Promise.resolve(response);
      }
 
