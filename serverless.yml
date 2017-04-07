@@ -29,7 +29,7 @@ provider:
   environment:
     APP_NAME: ${self:service}
     CLIENT_ID: ${env:SLACK_APP_CLIENT_ID}
-    CLIENT_SECRET: ${env:SLACK_APP_CLIENT_SECRET} 
+    CLIENT_SECRET: ${env:SLACK_APP_CLIENT_SECRET}
     INSTALL_SUCCESS_URL: https://s3-ap-southeast-2.amazonaws.com/aws-davidiog-syd-hezuo/static/success.html
     INSTALL_ERROR_URL: https://s3-ap-southeast-2.amazonaws.com/aws-davidiog-syd-hezuo/static/error.html
     NAMESPACE: ${self:custom.namespace}
@@ -40,7 +40,7 @@ provider:
     DEVELOPERS_TABLE: ${self:custom.namespace}-developers
     ACTIVITY_TABLE: ${self:custom.namespace}-activity
     CEU_TABLE: ${self:custom.namespace}-ceu
-
+    MEMBERS_TEAM_INDEX: ${self:custom.namespace}-members-team-index
 
   iamRoleStatements:
     - Effect: Allow
@@ -49,22 +49,27 @@ provider:
         - dynamodb:PutItem
         - dynamodb:Scan
         - dynamodb:Query
-      Resource: 
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.SLACK_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.DEVELOPERS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}/index/${self:provider.environment.MEMBERS_TEAM_INDEX}
     - Effect: Allow
       Action:
         - lambda:invokeFunction
-      Resource: 
+      Resource:
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-actions
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-parser
-        - arn:aws:lambda:*:*:function:${self:custom.namespace}-add-activity
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-test
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-list*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-remove*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-add*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-update*
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -90,6 +95,16 @@ functions:
     handler: commands/list-developers.handler
   list-members:
     handler: commands/list-members.handler
+  list-teams:
+    handler: commands/list-teams.handler
+  add-team:
+    handler: commands/add-team.handler
+  update-member-team:
+    handler: commands/update-member-team.handler
+  remove-team:
+    handler: commands/remove-team.handler
+  remove-member:
+    handler: commands/remove-member.handler
   add-activity:
     handler: commands/add-activity.handler
   parser:
@@ -108,8 +123,8 @@ functions:
       - http:
           path: install
           method: get
-  
-  
+
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -148,12 +163,26 @@ resources:
         AttributeDefinitions:
           - AttributeName: username
             AttributeType: S
+          - AttributeName:  teamname
+            AttributeType: S
         KeySchema:
           - AttributeName: username
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.MEMBERS_TEAM_INDEX}
+            KeySchema:
+              - AttributeName: teamname
+                KeyType: HASH
+            Projection:
+              NonKeyAttributes:
+                - teamname
+              ProjectionType: INCLUDE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
     HezuoDevelopersDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -172,10 +201,10 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TEAMS_TABLE}
         AttributeDefinitions:
-          - AttributeName: team_name
+          - AttributeName: teamname
             AttributeType: S
         KeySchema:
-          - AttributeName: team_name
+          - AttributeName: teamname
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

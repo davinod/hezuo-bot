@@ -7,10 +7,10 @@ var rawCommand, command, response;
 
 const getCommand = text => /^<@[A-X0-9]*>(.+)/.exec(text)[1].trim();
 
-// ************************
-// parseListMembers
-// Author: Davi
-// ************************
+/*const aList = ['list', 'display', 'show', 'fetch'];
+const aAdd = ['add', 'create', 'include'];
+const aRemove = ['remove', 'delete', 'terminate'];
+const aMembers = ['member', 'members', 'user', 'users', 'person'] ;*/
 
 const parseListMembers = () => {
 
@@ -22,7 +22,7 @@ const parseListMembers = () => {
     const resource = words[1];
 
     if (action !== "list" || resource !== 'members')
-        throw new Error ('Bad implementation for command parseListTeams');
+        throw new Error ('Bad implementation for command parseListMembers');
 
     response = {
         command: {
@@ -39,12 +39,7 @@ const parseListMembers = () => {
     };
 };
 
-// ************************
-// parseListDevelopers
-// Author: Davi
-// ************************
-
-const parseListDevelopers = () => {
+const parseListTeams = () => {
 
     //console.log('2 - command is ', command);
 
@@ -53,7 +48,7 @@ const parseListDevelopers = () => {
     const action = words[0];
     const resource = words[1];
 
-    if (action !== "list" || resource !== 'developers')
+    if (action !== "list" || resource !== 'teams')
         throw new Error ('Bad implementation for command parseListTeams');
 
     response = {
@@ -61,7 +56,7 @@ const parseListDevelopers = () => {
             commandLine: command,
             action: action,
             resource: resource,
-            api: 'list-developers',
+            api: 'list-teams',
             params: [],
             response: {
                 success: "$output",
@@ -71,48 +66,53 @@ const parseListDevelopers = () => {
     };
 };
 
-const apiProxy = () => {
-  const words = command.split(' ');
-  const action = words[0];
-  const resource = words[1];
-  var api = null;
+const addTeam = () => {
 
-  if (action == "list" && resource == 'teams') {
-    api = "list-teams"
-  } else if (action == "add" && resource == 'team') {
-    api = "add-team"
-  } else if (action == "update" && resource == 'member-team') {
-    api = "update-member-team"
-  } else if (action == "remove" && resource == 'team') {
-    api = "remove-team"
-  } else if (action == "remove" && resource == 'member') {
-    api = "remove-member"
-  } else {
-    throw new Error ('Bad implementation for command parser - ' + command);
-  }
+    const words = command.split(' ');
+    const action = words[0];
+    const resource = words[1];
 
-  response = {
-      command: {
-          commandLine: command,
-          action: action,
-          resource: resource,
-          api: api,
-          params: words.slice(2),
-          response: {
-              success: "$output",
-              error: "error to perform your command. Use list commands to see what I can do for ya.",
-          }
-      }
-  };
-}
+    if (action !== "add" || resource !== 'team')
+        throw new Error ('Bad implementation for command addTeam');
 
-// ********************************************
-// Parser
-//
-// Desc  : Responsible to parse commands
-// Author: Davi
-//
-// ********************************************
+    response = {
+        command: {
+            commandLine: command,
+            action: action,
+            resource: resource,
+            api: 'add-team',
+            params: words.slice(2),
+            response: {
+                success: "$output",
+                error: "error to perform your command. Use list commands to see what I can do for ya.",
+            }
+        }
+    };
+};
+
+const addTeamMember = () => {
+
+    const words = command.split(' ');
+    const action = words[0];
+    const resource = words[1];
+
+    if (action !== "add" || resource !== 'team-member')
+        throw new Error ('Bad implementation for command addTeamMember');
+
+    response = {
+        command: {
+            commandLine: command,
+            action: action,
+            resource: resource,
+            api: 'add-team-member',
+            params: words.slice(2),
+            response: {
+                success: "$output",
+                error: "error to perform your command. Use list commands to see what I can do for ya.",
+            }
+        }
+    };
+};
 
 module.exports.handler = (event, context, callback) => {
     log(event);
@@ -126,7 +126,6 @@ module.exports.handler = (event, context, callback) => {
     //console.log('1 - rawCommand is ', rawCommand);
     //console.log('1 - command is ', command);
 
-    //Check if it is a 2 word command, by looking for a white space after trim()
     if (command.indexOf(' ') > 0){
 
         //Split the command and isolate the two first words (action and resource)
@@ -142,22 +141,18 @@ module.exports.handler = (event, context, callback) => {
         //For new commands, please add another item to the case below resolving to your command
         //Please dont use synonyms. In order to make things simpler, parser only translate the exact command
 
-
         var resolver = null;
 
         if (action === 'list' && resource === 'members') {
           resolver = parseListMembers;
         } else if (action === 'list' && resource === 'teams') {
-          resolver = apiProxy;
+          resolver = parseListTeams;
         } else if (action === 'add' && resource === 'team') {
-          resolver = apiProxy;
-        } else if (action === 'update' && resource === 'member-team') {
-          resolver = apiProxy;
-        } else if (action === 'remove' && resource === 'team') {
-          resolver = apiProxy;
-        } else if (action === 'remove' && resource === 'member') {
-          resolver = apiProxy;
+          resolver = addTeam;
+        } else if (action === 'add' && resource === 'team-member') {
+          resolver = addTeamMember;
         } else {
+            //Command not found
             callback (new Error ("I dont understand this command `" + command + "`. Use `list commands` to get all valid command list"));
         }
 
@@ -169,6 +164,7 @@ module.exports.handler = (event, context, callback) => {
     } else {
         //console.log('1 word command found. But not supported.');
         //Later, we can develop other simple commands with one word
-        callback (new Error('command ' + command + ' is not supported. Use list commands to see what I can do for ya.'));
+        callback (new Error('command ' + command + ' is not supported'));
+
     }
 };
