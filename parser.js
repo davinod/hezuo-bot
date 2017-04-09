@@ -87,6 +87,8 @@ const apiProxy = () => {
     api = "remove-team"
   } else if (action == "remove" && resource == 'member') {
     api = "remove-member"
+  } else if (action == "list" && resource == 'team-members') {
+    api = "list-team-members"
   } else {
     throw new Error ('Bad implementation for command parser - ' + command);
   }
@@ -156,6 +158,8 @@ module.exports.handler = (event, context, callback) => {
         } else if (action === 'remove' && resource === 'team') {
           resolver = apiProxy;
         } else if (action === 'remove' && resource === 'member') {
+          resolver = apiProxy;
+        } else if (action === 'list' && resource === 'team-members') {
           resolver = apiProxy;
         } else {
             callback (new Error ("I dont understand this command `" + command + "`. Use `list commands` to get all valid command list"));
