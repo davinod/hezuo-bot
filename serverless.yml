@@ -239,19 +239,19 @@ resources:
          ProvisionedThroughput:
            ReadCapacityUnits: 1
            WriteCapacityUnits: 1
-    SlackBotDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.SLACK_TABLE}
-        AttributeDefinitions:
-          - AttributeName: team_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: team_id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+     SlackBotDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.SLACK_TABLE}
+         AttributeDefinitions:
+           - AttributeName: team_id
+             AttributeType: S
+         KeySchema:
+           - AttributeName: team_id
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
 #  Outputs:
 #     NewOutput:
 #       Description: "Description for the output"
