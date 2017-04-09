@@ -67,10 +67,10 @@ const sendResponse = (event, err) => {
         mrkdwn: true,
         token: slackRequest.team.bot.bot_access_token,
         channel: slackRequest.slack.event.channel,
-        text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + event.Payload.replace(/^['"]/g, '').replace(/['"]$/g, '') + "\n"
+        text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + JSON.parse(event.Payload) + "\n"
     };
 
-    console.log('message is ', params.text);
+    console.log('message is ', params.text, typeof(params.text));
 
     const url = `https://slack.com/api/chat.postMessage?${qs.stringify(params)}`;
     console.log(`Requesting ${url}`);
@@ -106,4 +106,3 @@ module.exports.handler = (event, context, callback) => {
         .catch((err) =>  callback(sendResponse(null, err))); //Error
 
 };
-

@@ -7,10 +7,8 @@ const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 function removeTeam(team_name, response) {
-
- if (response['members'] != null) {
-   response['error'] = response['members'] + " are part of the team. Update them using `update member-team <username> NONE`. Use `list members` to verify."
-   return Promise.resolve(response);
+ if (response['error'] != null) {
+    return;
  }
 
  var params = {
@@ -25,17 +23,21 @@ function removeTeam(team_name, response) {
  };
 
  console.log("Trying to remove team ", team_name);
- return docClient.delete(params, function(err, data) {
+ var deferred = Promise.defer();
+ docClient.delete(params, function(err, data) {
    if (err) {
        response['error'] = err;
        console.log(err, err.stack);
    } else {
        response['results'] = ["Successfully removed team - " + team_name]
    }
- }).promise();
+   deferred.resolve()
+ });
+ return deferred.promise;
 }
 
 function checkTeamMembers(team_name, response) {
+  var deferred = Promise.defer()
   var params = {
       TableName: process.env.MEMBERS_TABLE,
       IndexName: process.env.MEMBERS_TEAM_INDEX,
@@ -46,22 +48,28 @@ function checkTeamMembers(team_name, response) {
       ProjectionExpression: "username"
   };
 
-  return docClient.query(params, function(err, data) {
+  docClient.query(params, function(err, data) {
       if (err) {
-          console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+          response['error'] = "Error while querying existing members";
+          console.error("Error while querying existing members. Error:", JSON.stringify(err, null, 2));
+          defered.reject();
       } else if (data.Items.length > 0) {
         var members = [];
         data.Items.forEach(function (member) {
             members.push(member.username);
         });
-        response['members'] = members.join(', ');
+        if (members.length > 0) {
+          response['error'] = members.join(", ") + " are part of the team. Update them using `update member-team <username> NONE`. Use `list members` to verify."
+        }
       }
-  }).promise();
+      deferred.resolve()
+  });
+  return deferred.promise;
 }
 
-function formatError(error) {
+function formatError(error, response) {
     console.log("Error occurred while removing team - " + error);
-    return "Error occurred while removing team. Please make sure the team name is valid by running `list teams` command"
+    return "Error occurred while removing team. Please make sure the team name is valid by running `list teams` command";
 }
 
 function formatResponse(response) {
@@ -75,7 +83,7 @@ function formatResponse(response) {
 exports.handler = (event, context, callback) => {
     console.log(event);
 
-    var response = {results: [], error: null, members: null}
+    var response = {results: [], error: null}
 
     var team_name = event.params[0];
 
@@ -83,7 +91,7 @@ exports.handler = (event, context, callback) => {
 
     return Promise.resolve(team_name)
         .then(() => checkTeamMembers(team_name, response))
-        .then(() => removeTeam(team_name, response))
+        .then(() => removeTeam(team_name, response), null)
         .then(() => formatResponse(response), formatError)
         .then((msg) => callback(null, msg))
         .catch(error => callback(error, null));

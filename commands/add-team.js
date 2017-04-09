@@ -7,6 +7,8 @@ const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 function addTeam(team_name, response) {
+ var deferred = Promise.defer();
+
  var params = {
   Item: {
    "teamname": team_name
@@ -20,14 +22,16 @@ function addTeam(team_name, response) {
  };
 
  console.log("Trying to create team ", team_name);
- return docClient.put(params, function(err, data) {
+ docClient.put(params, function(err, data) {
    if (err) {
        response['error'] = err;
        console.log(err, err.stack);
    } else {
        response['results'] = ["Successfully created team - " + team_name]
    }
- }).promise();
+   deferred.resolve()
+ });
+ return deferred.promise;
 }
 
 function formatError(error) {
