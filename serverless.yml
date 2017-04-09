@@ -99,6 +99,8 @@ functions:
     handler: commands/list-teams.handler
   add-team:
     handler: commands/add-team.handler
+  add-member:
+    handler: commands/add-member.handler
   update-member-team:
     handler: commands/update-member-team.handler
   remove-team:

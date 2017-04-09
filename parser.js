@@ -40,6 +40,45 @@ const parseListMembers = () => {
 };
 
 // ************************
+// parseAddMember
+// Author: Davi
+// ************************
+
+const parseAddMember = () => {
+
+    //Assure that this is the right command
+    const words = command.split(' ');
+    const action = words[0];
+    const resource = words[1];
+
+    if (words.length < 4 || words.length > 5)
+        throw new Error ("Invalid arguments. Please verify right syntax of command by running `list commands` command") ;
+
+    if (action !== "add" || resource !== 'member')
+        throw new Error ('Bad implementation for command parseListTeams');
+
+    const username = words[2];
+    const teamname = (words.length === 4 ? words[2] : words[3]);  
+
+    response = {
+        command: {
+            commandLine: command,
+            action: action,
+            resource: resource,
+            api: 'add-member',
+            params: {
+                username: username,
+                teamname: teamname,
+            },
+            response: {
+                success: "$output",
+                error: "error to perform your command. Use list commands to see what I can do for ya.",
+            }
+        }
+    };
+};
+
+// ************************
 // parseListDevelopers
 // Author: Davi
 // ************************
@@ -153,6 +192,8 @@ module.exports.handler = (event, context, callback) => {
           resolver = apiProxy;
         } else if (action === 'add' && resource === 'team') {
           resolver = apiProxy;
+        } else if (action === 'add' && resource === 'member') {
+            resolver = parseAddMember;
         } else if (action === 'update' && resource === 'member-team') {
           resolver = apiProxy;
         } else if (action === 'remove' && resource === 'team') {
