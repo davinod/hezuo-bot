@@ -156,89 +156,89 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-#    HezuoMembersDynamoDbTable:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: ${self:provider.environment.MEMBERS_TABLE}
-#        AttributeDefinitions:
-#          - AttributeName: username
-#            AttributeType: S
-#          - AttributeName:  teamname
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: username
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#        GlobalSecondaryIndexes:
-#          - IndexName: ${self:provider.environment.MEMBERS_TEAM_INDEX}
-#            KeySchema:
-#              - AttributeName: teamname
-#                KeyType: HASH
-#            Projection:
-#              NonKeyAttributes:
-#                - teamname
-#              ProjectionType: INCLUDE
-#            ProvisionedThroughput:
-#              ReadCapacityUnits: 1
-#              WriteCapacityUnits: 1
-#    HezuoDevelopersDynamoDbTable:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: ${self:provider.environment.DEVELOPERS_TABLE}
-#        AttributeDefinitions:
-#          - AttributeName: username
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: username
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#    HezuoTeamsDynamoDbTable:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: ${self:provider.environment.TEAMS_TABLE}
-#        AttributeDefinitions:
-#          - AttributeName: teamname
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: teamname
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#    HezuoCEUDynamoDbTable:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: ${self:provider.environment.CEU_TABLE}
-#        AttributeDefinitions:
-#          - AttributeName: ceu_name
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: ceu_name
-#            KeyType: HASH
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
-#    HezuoActivityDynamoDbTable:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: ${self:provider.environment.ACTIVITY_TABLE}
-#        AttributeDefinitions:
-#          - AttributeName: username
-#            AttributeType: S
-#          - AttributeName: updated_at
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: username
-#            KeyType: HASH
-#          - AttributeName: updated_at
-#            KeyType: RANGE
-#        ProvisionedThroughput:
-#          ReadCapacityUnits: 1
-#          WriteCapacityUnits: 1
+     HezuoMembersDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.MEMBERS_TABLE}
+         AttributeDefinitions:
+           - AttributeName: username
+             AttributeType: S
+           - AttributeName:  teamname
+             AttributeType: S
+         KeySchema:
+           - AttributeName: username
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+         GlobalSecondaryIndexes:
+           - IndexName: ${self:provider.environment.MEMBERS_TEAM_INDEX}
+             KeySchema:
+               - AttributeName: teamname
+                 KeyType: HASH
+             Projection:
+               NonKeyAttributes:
+                 - teamname
+               ProjectionType: INCLUDE
+             ProvisionedThroughput:
+               ReadCapacityUnits: 1
+               WriteCapacityUnits: 1
+     HezuoDevelopersDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.DEVELOPERS_TABLE}
+         AttributeDefinitions:
+           - AttributeName: username
+             AttributeType: S
+         KeySchema:
+           - AttributeName: username
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoTeamsDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.TEAMS_TABLE}
+         AttributeDefinitions:
+           - AttributeName: teamname
+             AttributeType: S
+         KeySchema:
+           - AttributeName: teamname
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoCEUDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.CEU_TABLE}
+         AttributeDefinitions:
+           - AttributeName: ceu_name
+             AttributeType: S
+         KeySchema:
+           - AttributeName: ceu_name
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoActivityDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.ACTIVITY_TABLE}
+         AttributeDefinitions:
+           - AttributeName: username
+             AttributeType: S
+           - AttributeName: updated_at
+             AttributeType: S
+         KeySchema:
+           - AttributeName: username
+             KeyType: HASH
+           - AttributeName: updated_at
+             KeyType: RANGE
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
     SlackBotDynamoDbTable:
       Type: AWS::DynamoDB::Table
       Properties:
