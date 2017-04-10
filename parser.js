@@ -58,7 +58,7 @@ const parseAddMember = () => {
         throw new Error ('Bad implementation for command parseListTeams');
 
     const username = words[2];
-    const teamname = (words.length === 4 ? words[2] : words[3]);  
+    const teamname = (words.length === 4 ? words[2] : words[3]);
 
     response = {
         command: {
@@ -128,6 +128,8 @@ const apiProxy = () => {
     api = "remove-member"
   } else if (action == "list" && resource == 'team-members') {
     api = "list-team-members"
+  } else if (action == "describe" && resource == 'member') {
+    api = "describe-member"
   } else {
     throw new Error ('Bad implementation for command parser - ' + command);
   }
@@ -201,6 +203,8 @@ module.exports.handler = (event, context, callback) => {
         } else if (action === 'remove' && resource === 'member') {
           resolver = apiProxy;
         } else if (action === 'list' && resource === 'team-members') {
+          resolver = apiProxy;
+        } else if (action === 'describe' && resource === 'member') {
           resolver = apiProxy;
         } else {
             callback (new Error ("I dont understand this command `" + command + "`. Use `list commands` to get all valid command list"));

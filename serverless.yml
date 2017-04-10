@@ -70,6 +70,7 @@ provider:
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-remove*
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-add*
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-update*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-describe*
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -97,10 +98,14 @@ functions:
     handler: commands/list-members.handler
   list-teams:
     handler: commands/list-teams.handler
+  list-team-members:
+    handler: commands/list-team-members.handler
   add-team:
     handler: commands/add-team.handler
   add-member:
     handler: commands/add-member.handler
+  describe-member:
+    handler: commands/describe-member.handler
   update-member-team:
     handler: commands/update-member-team.handler
   remove-team:
