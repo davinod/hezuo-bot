@@ -6,7 +6,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 const USERNAME_FIELD = 'username';
 const ACTIVITY_FIELD = 'ceu_name';
 const MODIFIED_FIELD = 'updated_at';
-const TEAMNAME_FIELD = 'team_name';
+const TEAMNAME_FIELD = 'teamname';
 const MONTHS = {
   january: '01',
   feburary: '02',
