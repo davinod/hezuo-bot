@@ -187,20 +187,22 @@ const apiProxy = () => {
   const resource = words[1];
   var api = null;
 
-  if (action == "list" && resource == 'teams') {
-    api = "list-teams"
-  } else if (action == "add" && resource == 'team') {
-    api = "add-team"
-  } else if (action == "update" && resource == 'member-team') {
-    api = "update-member-team"
-  } else if (action == "remove" && resource == 'team') {
-    api = "remove-team"
-  } else if (action == "remove" && resource == 'member') {
-    api = "remove-member"
-  } else if (action == "list" && resource == 'team-members') {
-    api = "list-team-members"
-  } else if (action == "describe" && resource == 'member') {
-    api = "describe-member"
+  if (action === 'list' && resource === 'teams') {
+    api = 'list-teams'
+  } else if (action === 'add' && resource === 'team') {
+    api = 'add-team'
+  } else if (action === 'update' && resource === 'member-team') {
+    api = 'update-member-team'
+  } else if (action === 'remove' && resource === 'team') {
+    api = 'remove-team'
+  } else if (action === 'remove' && resource === 'member') {
+    api = 'remove-member'
+  } else if (action === 'list' && resource === 'team-members') {
+    api = 'list-team-members'
+  } else if (action === 'describe' && resource === 'member') {
+    api = 'describe-member';
+  } else if (action === 'list' && resource === 'activities') {
+    api = 'list-activities'
   } else {
     throw new Error ('Bad implementation for command parser - ' + command);
   }
@@ -278,6 +280,8 @@ module.exports.handler = (event, context, callback) => {
         } else if (action === 'list' && resource === 'team-members') {
             resolver = apiProxy;
         } else if (action === 'describe' && resource === 'member') {
+            resolver = apiProxy;
+        } else if (action === 'list' && resource === 'activities') {
             resolver = apiProxy;
         } else {
             console.log('commad not parsed.');
