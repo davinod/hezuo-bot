@@ -93,7 +93,7 @@ exports.handler = (event, context, callback) => {
     .toLowerCase();
 
   const params = {
-    TableName: process.env.TEAM_ACTIVITIES_TABLE,
+    TableName: process.env.ACTIVITY_TABLE,
     // eslint-disable-next-line max-len
     ProjectionExpression: `${USERNAME_FIELD}, ${TEAMNAME_FIELD}, ${ACTIVITY_FIELD}, ${MODIFIED_FIELD}`,
     FilterExpression: `${MODIFIED_FIELD} between :som and :eom`,

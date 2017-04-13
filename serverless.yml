@@ -114,6 +114,8 @@ functions:
     handler: commands/remove-member.handler
   add-activity:
     handler: commands/add-activity.handler
+  list-activities:
+    handler: commands/list-activities.handler
   parser:
     handler: parser.handler
   actions:
