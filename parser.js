@@ -7,8 +7,6 @@ var rawCommand, command, response;
 
 const getCommand = text => /^<@[A-X0-9]*>(.+)/.exec(text)[1].trim();
 
-<<<<<<< HEAD
-
 // ************************
 // parseAddActivity
 // Author: dutony
@@ -73,15 +71,6 @@ const parseAddActivity = () => {
 
 const parseListMembers = () => {
 
-=======
-// ************************
-// parseListMembers
-// Author: Davi
-// ************************
-
-const parseListMembers = () => {
-
->>>>>>> d8d9fb4b76e1b8b3e80c3faababd2fab5e456aa2
     //console.log('2 - command is ', command);
 
     //Assure that this is the right command
@@ -119,14 +108,26 @@ const parseAddMember = () => {
     const action = words[0];
     const resource = words[1];
 
-    if (words.length < 4 || words.length > 5)
-        throw new Error ("Invalid arguments. Please verify right syntax of command by running `list commands` command") ;
+    console.log('command parseAddMember executing');
+    console.log('actio is ', action);
+    console.log('resource is ', resource);
+    console.log('number of words is ', words.length);
 
-    if (action !== "add" || resource !== 'member')
-        throw new Error ('Bad implementation for command parseListTeams');
+    if (words.length < 4 || words.length > 5){
+        console.log('invalid number of arguments.');
+        throw new Error ("Invalid arguments. Please verify right syntax of command by running `list commands` command") ;
+    }
+
+    if (action !== "add" || resource !== 'member'){
+        console.log('bad implementation.');
+        throw new Error ('Bad implementation for command parseAddMember');
+    }
 
     const username = words[2];
-    const teamname = (words.length === 4 ? words[2] : words[3]);
+    const teamname = (words.length === 4 ? words[3] : words[4]);
+
+    console.log('username detected is ', username);
+    console.log('team name detected is ', teamname);
 
     response = {
         command: {
@@ -144,6 +145,8 @@ const parseAddMember = () => {
             }
         }
     };
+
+    console.log('response is ', response);
 };
 
 // ************************
@@ -245,9 +248,9 @@ module.exports.handler = (event, context, callback) => {
         const action = words[0].toLowerCase();
         const resource = words[1].toLowerCase();
 
-        //console.log('words is ', words);
-        //console.log('action is ', action);
-        //console.log('resource is ', resource);
+        console.log('words is ', words);
+        console.log('action is ', action);
+        console.log('resource is ', resource);
 
         //Check the action/resource and invoke the specific function
         //For new commands, please add another item to the case below resolving to your command
@@ -257,26 +260,27 @@ module.exports.handler = (event, context, callback) => {
         var resolver = null;
 
         if (action === 'list' && resource === 'members') {
-          resolver = parseListMembers;
+            resolver = parseListMembers;
         } else if (action === 'add' && resource === 'activity') {
-          resolver = parseAddActivity;
+            resolver = parseAddActivity;
         } else if (action === 'list' && resource === 'teams') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else if (action === 'add' && resource === 'team') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else if (action === 'add' && resource === 'member') {
             resolver = parseAddMember;
         } else if (action === 'update' && resource === 'member-team') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else if (action === 'remove' && resource === 'team') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else if (action === 'remove' && resource === 'member') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else if (action === 'list' && resource === 'team-members') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else if (action === 'describe' && resource === 'member') {
-          resolver = apiProxy;
+            resolver = apiProxy;
         } else {
+            console.log('commad not parsed.');
             callback (new Error ("I dont understand this command `" + command + "`. Use `list commands` to get all valid command list"));
         }
 
@@ -284,7 +288,10 @@ module.exports.handler = (event, context, callback) => {
                 .then(resolver)
                 .then(event = Object.assign(event, response))
                 .then((event) => callback(null, response))  //Success
-                .catch((err) =>  callback(sendResponse(null, err))); //Error
+                .catch((err) => {
+                    console.log('parser catch reached. err is ', err);
+                    callback(err);
+                }); //Error
     } else {
         //console.log('1 word command found. But not supported.');
         //Later, we can develop other simple commands with one word
