@@ -10,18 +10,31 @@ const log = event => console.log('Event', JSON.stringify(event, null, 2));
 // *************************************************************** //
 //  Function to invoke the parser to evaluate the command received //
 // *************************************************************** //
-const invokeParser = (event) => {
+const invokeParser = (event, err) => {
     if (!event) return null;
 
     console.log('============ invokeParser start ==============');
     console.log(`Parsing ${parserFunctionName} with request `, event);
 
-    //Return a promise of the parser lambda invoked
-    return lambda.invoke({
+    const lambdaParams = {
         FunctionName: parserFunctionName,
         InvocationType: 'RequestResponse',
         LogType: 'Tail',
         Payload: JSON.stringify(event),
+    };
+
+    //Return a promise of the parser lambda invoked
+    return lambda.invoke(lambdaParams, function(error, data) {
+
+        console.log('parser invoked.');
+        console.log('data is ', data);
+        console.log('error is ', error);
+
+        if (error){
+            console.log('lambda actions detected problem in the parser.');
+            throw new Error(error);
+        }
+
     }).promise();
 };
 
