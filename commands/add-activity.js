@@ -24,7 +24,8 @@ const putItem = (callback) => {
 	console.log("putting item");
 
 	const d = new Date();
-	const currentTime = `${d.getFullYear()}${d.getMonth()+1}${d.getDate()}_${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}UTC`;
+	// const currentTime = `${d.getFullYear()}${d.getMonth()+1}${d.getDate()}_${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}UTC`;
+	const currentTime = new Date();
 
 	const dbTable = process.env.ACTIVITY_TABLE;
 
