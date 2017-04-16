@@ -80,8 +80,9 @@ const sendResponse = (event, err) => {
         mrkdwn: true,
         token: slackRequest.team.bot.bot_access_token,
         channel: slackRequest.slack.event.channel,
-        text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + JSON.parse(event.Payload) + "\n"
-        // text: err ? err.message : `Hey <@" + slackRequest.slack.event.user + ">, Your response to command ${command}: ${JSON.parse(event.Payload).errorMessage}`
+        // text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + JSON.parse(event.Payload) + "\n"
+        // SUGGEST TO CHANGE THE ABOVE LINE TO THE FOLLOWING COMMENTED LINE, WHICH PARSES THE RESPONSE A LITTLE BIT BETTER
+        text: err ? err.message : `Hey <@" + slackRequest.slack.event.user + ">, Your response to command ${command}: ${JSON.parse(event.Payload).errorMessage || JSON.parse(event.Payload)}`
     };
 
     console.log('message is ', params.text, typeof(params.text));
