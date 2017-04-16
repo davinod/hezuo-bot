@@ -116,11 +116,11 @@ const parseListActivity = () => {
     
     console.log('original command is ', command);
 
-    //Remove optional words
+    //Remove optional words and transform to lower case
     command = command.replace(' from ', ' ')
                      .replace(' for ', ' ')
                      .replace(' in ', ' ')
-                     .replace(' during ', ' ');
+                     .replace(' during ', ' ').toLowerCase();
 
     console.log('command is now ', command);
 

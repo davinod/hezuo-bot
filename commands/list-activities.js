@@ -91,11 +91,11 @@ exports.handler = (event, context, callback) => {
 
   console.log('event is ', event);
 
-  const teamname = event.command.params.teamname;
+  const teamname = event.params.teamname;
 
   console.log('teamname is ', teamname);
 
-  const month = event.command.params.month || new Date().getMonth().toLowerCase();
+  const month = event.params.month || new Date().getMonth().toLowerCase();
 
   console.log('month is ', month);
 

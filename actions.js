@@ -55,7 +55,8 @@ const invokeAction = (event) => {
     if (JSON.parse(event.Payload).errorMessage) throw new Error (JSON.parse(event.Payload).errorMessage);
 
     var command = JSON.parse(event.Payload).command;
-    console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with payload ', event);
+    console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with event ', event);
+    console.log('payload is ', command);
 
     //Return a promise of the lambda command invoked
     return lambda.invoke({
