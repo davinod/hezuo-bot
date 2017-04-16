@@ -7,6 +7,10 @@ var rawCommand, command, response;
 
 const getCommand = text => /^<@[A-X0-9]*>(.+)/.exec(text)[1].trim();
 
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
 // ************************
 // parseAddActivity
 // Author: dutony
@@ -97,6 +101,77 @@ const parseListMembers = () => {
 };
 
 // ************************
+// parseListActivity
+// Author: Davi
+// ************************
+
+const parseListActivity = () => {
+
+    
+    // the command may be accept the following variations
+    // list < activity | activities > < blank | from | for > team1 < blank | in | during > < (optional) month >
+    // i.e.:
+    // list activity team1
+    // list activity from team during april
+    
+    console.log('original command is ', command);
+
+    //Remove optional words
+    command = command.replace(' from ', ' ')
+                     .replace(' for ', ' ')
+                     .replace(' in ', ' ')
+                     .replace(' during ', ' ');
+
+    console.log('command is now ', command);
+
+    //Assure that this is the right command
+    const words = command.split(' ');
+
+    const action = words[0];
+    const resource = words[1];
+
+    console.log('command parseListActivity executing');
+    console.log('action is ', action);
+    console.log('resource is ', resource);
+    console.log('number of words is ', words.length);
+
+    if (words.length < 3 || words.length > 4){
+        console.log('invalid number of arguments.');
+        throw new Error ("Invalid arguments. Please verify right syntax of command by running `list commands` command") ;
+    }
+
+    if (action !== "list" || (resource !== 'activity' && resource !== 'activities')){
+        console.log('bad implementation.');
+        throw new Error ('Bad implementation for command parseListActivity');
+    }
+
+    const teamname = words[2];
+    const month = (words.length === 4 ? words[3] : monthNames[new Date().getMonth()].toLowerCase() );
+    
+    console.log('teamname detected is ', teamname);
+    console.log('month name detected is ', month);
+
+    response = {
+        command: {
+            commandLine: command,
+            action: action,
+            resource: resource,
+            api: 'list-activities',
+            params: {
+                teamname: teamname,
+                month: month,
+            },
+            response: {
+                success: "$output",
+                error: "error to perform your command. Use list commands to see what I can do for ya.",
+            }
+        }
+    };
+
+    console.log('response is ', response);
+};
+
+// ************************
 // parseAddMember
 // Author: Davi
 // ************************
@@ -148,6 +223,7 @@ const parseAddMember = () => {
 
     console.log('response is ', response);
 };
+
 
 // ************************
 // parseListDevelopers
@@ -201,8 +277,6 @@ const apiProxy = () => {
     api = 'list-team-members'
   } else if (action === 'describe' && resource === 'member') {
     api = 'describe-member';
-  } else if (action === 'list' && resource === 'activities') {
-    api = 'list-activities'
   } else {
     throw new Error ('Bad implementation for command parser - ' + command);
   }
@@ -265,6 +339,8 @@ module.exports.handler = (event, context, callback) => {
             resolver = parseListMembers;
         } else if (action === 'add' && resource === 'activity') {
             resolver = parseAddActivity;
+        } else if (action === 'list' && (resource === 'activity' || resource === 'activities')) {
+            resolver = parseListActivity;
         } else if (action === 'list' && resource === 'teams') {
             resolver = apiProxy;
         } else if (action === 'add' && resource === 'team') {

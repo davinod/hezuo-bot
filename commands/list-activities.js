@@ -6,7 +6,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 const USERNAME_FIELD = 'username';
 const ACTIVITY_FIELD = 'ceu_name';
 const MODIFIED_FIELD = 'updated_at';
-const TEAMNAME_FIELD = 'teamname';
+const teamname_FIELD = 'teamname';
 const MONTHS = {
   january: '01',
   feburary: '02',
@@ -22,7 +22,7 @@ const MONTHS = {
   december: '12',
 };
 
-function onScan(err, data, teamName) {
+function onScan(err, data, teamname) {
   return Promise.resolve().then(() => {
     const response = { results: [], error: null };
     if (err) {
@@ -30,7 +30,7 @@ function onScan(err, data, teamName) {
       response.error = ('Unable to query the table. ', err.errorMessage);
     } else {
       data.Items.forEach((activity) => {
-        if (activity[TEAMNAME_FIELD] === teamName) {
+        if (activity[teamname_FIELD] === teamname) {
           response.results.push(activity);
         }
       });
@@ -45,10 +45,10 @@ function onScan(err, data, teamName) {
   });
 }
 
-function scanTeamActivities(params, teamName) {
+function scanTeamActivities(params, teamname) {
   return new Promise((resolve) =>
     docClient.scan(params, (err, data) =>
-      resolve(onScan(err, data, teamName))));
+      resolve(onScan(err, data, teamname))));
 }
 
 function formatError(error) {
@@ -62,7 +62,7 @@ function formatResponse(res) {
   let msg = '```';
   /* eslint-disable prefer-template */
   if (response.length > 0) {
-    msg += '\nTeam Name: ' + response[0][TEAMNAME_FIELD] + '\n';
+    msg += '\nTeam Name: ' + response[0][teamname_FIELD] + '\n';
     msg += '\nTeam Activities:\n';
     msg += '-'.repeat(93) + '\n';
     msg += '| Activity  ' + ' '.repeat(39) + ' | ';
@@ -83,19 +83,26 @@ function formatResponse(res) {
   } else {
     msg = 'No data for this team during the month specified!';
   }
+  console.log('msg is ', msg);
   return msg;
 }
 
 exports.handler = (event, context, callback) => {
-  const teamName = event.params.teamName;
-  const month = event.params.month || new Date()
-    .toLocaleString('en-us', { month: 'long' })
-    .toLowerCase();
+
+  console.log('event is ', event);
+
+  const teamname = event.command.params.teamname;
+
+  console.log('teamname is ', teamname);
+
+  const month = event.command.params.month || new Date().getMonth().toLowerCase();
+
+  console.log('month is ', month);
 
   const params = {
     TableName: process.env.ACTIVITY_TABLE,
     // eslint-disable-next-line max-len
-    ProjectionExpression: `${USERNAME_FIELD}, ${TEAMNAME_FIELD}, ${ACTIVITY_FIELD}, ${MODIFIED_FIELD}`,
+    ProjectionExpression: `${USERNAME_FIELD}, ${teamname_FIELD}, ${ACTIVITY_FIELD}, ${MODIFIED_FIELD}`,
     FilterExpression: `${MODIFIED_FIELD} between :som and :eom`,
     ExpressionAttributeValues: {
       ':som' : `2017-${MONTHS[month]}-01`,
@@ -103,7 +110,9 @@ exports.handler = (event, context, callback) => {
     },
   };
 
-  scanTeamActivities(params, teamName)
+  console.log('params is ', params);
+
+  scanTeamActivities(params, teamname)
     .then((response) => formatResponse(response), formatError)
     .then((msg) => callback(null, msg))
     .catch(error => callback(error, null));

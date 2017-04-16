@@ -76,6 +76,8 @@ const sendResponse = (event, err) => {
     //console.log('err is ', err);
     var command = slackRequest.slack.event.text;
 
+    console.log('sendResponse invoked, event is ', event);
+
     const params = {
         mrkdwn: true,
         token: slackRequest.team.bot.bot_access_token,
