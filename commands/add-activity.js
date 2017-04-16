@@ -17,33 +17,36 @@ const hasError = function(evt) {
 	    return true;	
 	}
 	return false;
-}
+};
 
-const putItem = (callback) => {
+const putItem = (memberList, callback) => {
 
 	console.log("putting item");
 
 	const d = new Date();
-	// const currentTime = `${d.getFullYear()}${d.getMonth()+1}${d.getDate()}_${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}UTC`;
-	const currentTime = new Date();
+	const currentTime = d.toISOString();
 
 	const dbTable = process.env.ACTIVITY_TABLE;
 
 	let items = [];
 
-	members.forEach((member) => {
-		items.push({
+	console.log('memberList: ', memberList);
+
+	for (var item of memberList) {
+		if (item.username) {
+			items.push({
 	        PutRequest: {
 	          Item: {
-	              username: member, 
+	              username: item.username, 
 			      updated_at: currentTime,
 			      ceu_name: activity,
-			      team_name: "a",
+			      team_name: item.teamname,
 			      comment: comment
 	          }
 	        }
 	      });
-	});
+		}
+	}
 
 	let requestItems = {};
 	requestItems[dbTable] = items;
@@ -59,35 +62,33 @@ const putItem = (callback) => {
 	  }
 	  else {
 	  	console.log(data);
-	  	callback(null, `Successfully added the activity: ${activity}`);
+	  	callback(null, `Successfully added the activity: ${activity} for ${members.join(',')}`);
 	  } 
 	});
-}
+};
 
-const verifyActivity = (act) => {
-	return new Promise((resolve, reject) => {
-		var params = {
-		  TableName : process.env.CEU_TABLE,
-		  Key: {
-		    ceu_name: act
-		  }
-		};
+const verifyActivity = (act, callback) => {
+	var params = {
+	  TableName : process.env.CEU_TABLE,
+	  Key: {
+	    ceu_name: act
+	  }
+	};
 
-		docClient.get(params, (err, data) => {
-		  if (err) {
-		  	console.log(err);
-		  	reject(err);
-		  }
-		  else {
-		  	if (data.Item) {
-		      resolve(data);	
-		  	} else {
-		  	  reject(`${act} is not a valid activity`);
-		  	}
-		  }
-		});
-	})
-}
+	docClient.get(params, (err, data) => {
+	  if (err) {
+	  	console.log(err);
+	  	callback(err.message, null);
+	  }
+	  else {
+	  	if (data.Item) {
+	  		callback(null, data);
+	  	} else {
+	  		callback(`${act} is not a valid activity`, null);
+	  	}
+	  }
+	});
+};
 
 const memberNotExists = (username, memberArray) => {
 	for (var i=0; i<memberArray.length; i++) {
@@ -98,34 +99,46 @@ const memberNotExists = (username, memberArray) => {
 	}
 	console.log(`member ${username} does not exist`);
 	return true;
-}
+};
 
-const verifyMembers = (mems) => {
-	return new Promise((resolve, reject) => {
+const getMemberItem = (username, memberItems) => {
+	for (var item of memberItems) {
+		if (item.username === username) {
+			return item;
+		}
+	}
+};
 
-		var params = {
-		  TableName : process.env.MEMBERS_TABLE
-		};
+const verifyMembers = (mems, callback) => {
 
-		docClient.scan(params, (err, data) => {
-		   if (err) {
-		   	console.log(err);
-		   	reject(err);
-		   } 
-		   else {
-		   	console.log(data);
-		   	console.log(mems);
-		   	for (var m=0; m<mems.length; m++) {
-		   		if (memberNotExists(mems[m], data.Items)) {
-		   			console.log(`user ${mems[m]} does not exist`);
-		   			reject(`user ${mems[m]} does not exist`);
-		   		}
-		   	}
-		   }
-		});
+	let memberList = [];
 
-	})
-}
+	var params = {
+	  TableName : process.env.MEMBERS_TABLE
+	};
+
+	docClient.scan(params, (err, data) => {
+	   if (err) {
+	   	console.log(err);
+	   	callback(err, null);
+	   } 
+	   else {
+	   	console.log(data);
+	   	console.log(mems);
+	   	for (var m of mems) {
+	   		if (memberNotExists(m, data.Items)) {
+	   			console.log(`user ${m} does not exist`);
+	   			callback(`user ${m} does not exist`, null);
+	   			return;
+	   		}
+	   		memberList.push(getMemberItem(m, data.Items));
+	   	}
+	   	console.log('memberList: ', memberList);
+	   	callback(null, memberList);
+	   }
+	});
+
+};
 
 const handleError = (err) => {
 	console.log('error from handleError');
@@ -139,9 +152,18 @@ exports.handler = (event, context, callback) => {
     activity = event.params.activity;
     comment = event.params.comment || 'NA';
     members = event.params.members;
-    Promise.all([verifyActivity(activity), verifyMembers(members)])
-      .then(
-    	putItem(callback)
-      )
-      .catch((err) => {callback(err, null)})
+    verifyActivity(activity, (verifyActivityError, data) => {
+    	if (verifyActivityError) {
+    		callback(verifyActivityError, null);
+    	} else {
+    		verifyMembers(members, (verifyMembersError, memberList) => {
+	    		if (verifyMembersError) {
+	    			callback(verifyMembersError, null);
+	    		} else {
+	    			putItem(memberList, callback);
+	    		}
+	    	});
+    	}
+    });
+
 };

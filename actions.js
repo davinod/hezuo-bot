@@ -81,6 +81,7 @@ const sendResponse = (event, err) => {
         token: slackRequest.team.bot.bot_access_token,
         channel: slackRequest.slack.event.channel,
         text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + JSON.parse(event.Payload) + "\n"
+        // text: err ? err.message : `Hey <@" + slackRequest.slack.event.user + ">, Your response to command ${command}: ${JSON.parse(event.Payload).errorMessage}`
     };
 
     console.log('message is ', params.text, typeof(params.text));
