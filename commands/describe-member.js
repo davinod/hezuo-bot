@@ -19,11 +19,11 @@ function onActivityScan(err, data, params, deferred, response) {
         } else {
             console.log("Teams Scan succeeded" , data.Items);
             data.Items.forEach(function (activity) {
-                if (typeof response['metadata'][activity.ceu_name] != "undefined") {
-                    response['activities']['total_hezuo_points'] += response['metadata'][activity.ceu_name]['hezuo_points']
-                    response['activities']['total_ceu_points'] += response['metadata'][activity.ceu_name]['ceu_points']
+                if (typeof response['metadata'][activity.ceuname] != "undefined") {
+                    response['activities']['total_hezuo_points'] += response['metadata'][activity.ceuname]['hezuo_points']
+                    response['activities']['total_ceu_points'] += response['metadata'][activity.ceuname]['ceu_points']
                     if (response['activities']['recent'].length < ACTIVITIES_LIMIT) {
-                        response['activities']['recent'].push([activity.ceu_name, activity.teamname, activity.updated_at])
+                        response['activities']['recent'].push([activity.ceuname, activity.teamname, activity.updated_at])
                     }
                 }
             });
@@ -56,7 +56,7 @@ function getActivityReport(member_name, response) {
         ExpressionAttributeValues: {
             ":member_name": member_name
         },
-        ProjectionExpression: "ceu_name, updated_at, teamname"
+        ProjectionExpression: "ceuname, updated_at, teamname"
     };
 
     var deferred = Promise.defer();
@@ -75,7 +75,7 @@ function onMetadataScan(err, data, params, response, deferred) {
         } else {
             console.log("Metadata Scan succeeded" , data.Items);
             data.Items.forEach(function (ceu) {
-                response['metadata'][ceu.ceu_name] = {
+                response['metadata'][ceu.ceuname] = {
                     hezuo_points: (ceu.hezuo_points > 0)?ceu.hezuo_points:0,
                     ceu_points: (ceu.ceu_points > 0)?ceu.ceu_points:0
                   }
@@ -103,7 +103,7 @@ function loadMetadata(response) {
 
     var params = {
       TableName: process.env.CEU_TABLE,
-      ProjectionExpression: "ceu_name, hezuo_points, ceu_points"
+      ProjectionExpression: "ceuname, hezuo_points, ceu_points"
     };
 
     var deferred = Promise.defer();
@@ -123,7 +123,7 @@ function formatResponse(response, member_name) {
     console.log(response);
     var msg = "```";
     msg += "Member Name: " + member_name + "\n";
-    msg += "Current Team Name: " + response['team_name'] + "\n";
+    msg += "Current Team Name: " + response['teamname'] + "\n";
     msg += "Total Hezuo Points (All Time): " + response['activities']['total_hezuo_points'] + "\n";
     msg += "Total CEU Points (All Time): " + response['activities']['total_ceu_points'] + "\n";
     msg += "\nRecent Activity:\n";
@@ -134,9 +134,9 @@ function formatResponse(response, member_name) {
     msg += "-".repeat(92) + "\n"
 
     response['activities']['recent'].forEach(function (activity) {
-        padding = 50 - activity[0].length; // ceu_name
+        padding = 50 - activity[0].length; // ceuname
         msg += "| " + activity[0] + " ".repeat(padding)
-        padding = 9 - activity[1].length; // team_name
+        padding = 9 - activity[1].length; // teamname
         msg += "| " + activity[1] + " ".repeat(padding)
         padding = 30 - activity[2].length; // updated_at
         msg += "| " + activity[2] + " |\n"
@@ -159,7 +159,7 @@ function memberExists(member_name, response) {
       if (err) console.error(err);
       response['errors'].push("Couldn't get member information for ```" + member_name + "```. Check if member name is valid using ```list members```");
     } else {
-        response['team_name'] = data.Item.teamname;
+        response['teamname'] = data.Item.teamname;
     }
     deferred.resolve()
   });
@@ -174,7 +174,7 @@ exports.handler = (event, context, callback) => {
     var response = {
         member_name: member_name,
         metadata: {},
-        team_name: null,
+        teamname: null,
         activities: {
             total_hezuo_points: 0,
             total_ceu_points: 0,
