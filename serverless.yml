@@ -51,6 +51,7 @@ provider:
         - dynamodb:Query
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+        - dynamodb:BatchWriteItem
       Resource:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.SLACK_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}
