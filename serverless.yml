@@ -219,19 +219,19 @@ resources:
          ProvisionedThroughput:
            ReadCapacityUnits: 1
            WriteCapacityUnits: 1
-     HezuoCEUDynamoDbTable:
-       Type: AWS::DynamoDB::Table
-       Properties:
-         TableName: ${self:provider.environment.CEU_TABLE}
-         AttributeDefinitions:
-           - AttributeName: ceu_name
-             AttributeType: S
-         KeySchema:
-           - AttributeName: ceu_name
-             KeyType: HASH
-         ProvisionedThroughput:
-           ReadCapacityUnits: 1
-           WriteCapacityUnits: 1
+     #HezuoCEUDynamoDbTable:
+     #  Type: AWS::DynamoDB::Table
+     #  Properties:
+     #    TableName: ${self:provider.environment.CEU_TABLE}
+     #    AttributeDefinitions:
+     #      - AttributeName: ceuname
+     #        AttributeType: S
+     #    KeySchema:
+     #      - AttributeName: ceuname
+     #        KeyType: HASH
+     #    ProvisionedThroughput:
+     #      ReadCapacityUnits: 1
+     #      WriteCapacityUnits: 1
      HezuoActivityDynamoDbTable:
        Type: AWS::DynamoDB::Table
        Properties:

@@ -39,8 +39,8 @@ const putItem = (memberList, callback) => {
 	          Item: {
 	              username: item.username, 
 			      updated_at: currentTime,
-			      ceu_name: activity,
-			      team_name: item.teamname,
+			      ceuname: activity,
+			      teamname: item.teamname,
 			      comment: comment
 	          }
 	        }
@@ -71,7 +71,7 @@ const verifyActivity = (act, callback) => {
 	var params = {
 	  TableName : process.env.CEU_TABLE,
 	  Key: {
-	    ceu_name: act
+	    ceuname: act
 	  }
 	};
 

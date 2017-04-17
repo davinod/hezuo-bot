@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 const USERNAME_FIELD = 'username';
-const ACTIVITY_FIELD = 'ceu_name';
+const ACTIVITY_FIELD = 'ceuname';
 const MODIFIED_FIELD = 'updated_at';
 const teamname_FIELD = 'teamname';
 const MONTHS = {
@@ -71,9 +71,9 @@ function formatResponse(res) {
     msg += '-'.repeat(92) + '\n';
 
     response.forEach((activity) => {
-      padding = 50 - activity[ACTIVITY_FIELD].length; // ceu_name
+      padding = 50 - activity[ACTIVITY_FIELD].length; // ceuname
       msg += '| ' + activity[ACTIVITY_FIELD] + ' '.repeat(padding);
-      padding = 9 - activity[USERNAME_FIELD].length; // team_name
+      padding = 9 - activity[USERNAME_FIELD].length; // teamname
       msg += '| ' + activity[USERNAME_FIELD] + ' '.repeat(padding);
       padding = 30 - activity[MODIFIED_FIELD].length; // updated_at
       msg += '| ' + activity[MODIFIED_FIELD] + ' |\n';
