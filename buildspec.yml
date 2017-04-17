@@ -1,0 +1,21 @@
+version: 0.1
+
+phases:
+  pre_build:
+    commands:
+      - npm install
+      - echo "Arguments received:"
+      - echo "ENV_TYPE=$ENV_TYPE"
+      - echo "SNS_TOPIC_ARN=$SNS_TOPIC_ARN"
+  build:
+    commands:
+      - echo Build started on `date`
+      # enable pipefail to capture the exit code of sls deploy instead of tee
+      - set -o pipefail
+      - sls deploy | tee /tmp/hezuo-builder/deploy.log
+      # disable pipefail just in case there are more commands in the future
+      - set +o pipefail
+  post_build:
+    commands: 
+      - echo Build completed on `date`
+      - python /tmp/hezuo-builder/publish.py

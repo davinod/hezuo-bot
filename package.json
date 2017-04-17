@@ -1,0 +1,22 @@
+{
+  "name": "@davinod/hezuo-bot",
+  "version": "1.0.0",
+  "description": "necessary to control npm dependencies for lambda",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davinod/hezuo-bot.git"
+  },
+  "author": "davinod",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davinod/hezuo-bot/issues"
+  },
+  "homepage": "https://github.com/davinod/hezuo-bot#readme",
+  "dependencies": {
+    "node-fetch": "^1.6.3"
+  }
+}

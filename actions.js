@@ -10,18 +10,31 @@ const log = event => console.log('Event', JSON.stringify(event, null, 2));
 // *************************************************************** //
 //  Function to invoke the parser to evaluate the command received //
 // *************************************************************** //
-const invokeParser = (event) => {
+const invokeParser = (event, err) => {
     if (!event) return null;
 
     console.log('============ invokeParser start ==============');
     console.log(`Parsing ${parserFunctionName} with request `, event);
 
-    //Return a promise of the parser lambda invoked
-    return lambda.invoke({
+    const lambdaParams = {
         FunctionName: parserFunctionName,
         InvocationType: 'RequestResponse',
         LogType: 'Tail',
         Payload: JSON.stringify(event),
+    };
+
+    //Return a promise of the parser lambda invoked
+    return lambda.invoke(lambdaParams, function(error, data) {
+
+        console.log('parser invoked.');
+        console.log('data is ', data);
+        console.log('error is ', error);
+
+        if (error){
+            console.log('lambda actions detected problem in the parser.');
+            throw new Error(error);
+        }
+
     }).promise();
 };
 
@@ -35,14 +48,15 @@ const invokeAction = (event) => {
     //console.log('errorMessage is ', JSON.parse(event.Payload).errorMessage);
 
     if (!event) return null;
-    
+
     //It may happen that the parser had an exception because the command was not parsed, this is to
     //ensure the command is not invoked. Somehow, the catch in the main function is not being triggered
     //Just keep this if for now
     if (JSON.parse(event.Payload).errorMessage) throw new Error (JSON.parse(event.Payload).errorMessage);
-    
+
     var command = JSON.parse(event.Payload).command;
-    console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with payload ', event);
+    console.log('Invoking Api ',  `${process.env.NAMESPACE}-` + command.api  + 'with event ', event);
+    console.log('payload is ', command);
 
     //Return a promise of the lambda command invoked
     return lambda.invoke({
@@ -61,14 +75,20 @@ const sendResponse = (event, err) => {
     console.log('============ sendResponse ==============');
     //console.log('event is ', event);
     //console.log('err is ', err);
-    
+    var command = slackRequest.slack.event.text;
+
+    console.log('sendResponse invoked, event is ', event);
+
     const params = {
+        mrkdwn: true,
         token: slackRequest.team.bot.bot_access_token,
         channel: slackRequest.slack.event.channel,
-        text: err ? err.message : 'Hey <@' + slackRequest.slack.event.user + '>, ' + event.Payload.replace(/['"]+/g, ''),
+        // text: err ? err.message : "Hey <@" + slackRequest.slack.event.user + ">, Your response to command `" + command + "`:\n" + JSON.parse(event.Payload) + "\n"
+        // SUGGEST TO CHANGE THE ABOVE LINE TO THE FOLLOWING COMMENTED LINE, WHICH PARSES THE RESPONSE A LITTLE BIT BETTER
+        text: err ? err.message : `Hey <@${slackRequest.slack.event.user}>, Your response to command ${command}: ${JSON.parse(event.Payload).errorMessage || JSON.parse(event.Payload)}`
     };
 
-    console.log('message is ', params.text);
+    console.log('message is ', params.text, typeof(params.text));
 
     const url = `https://slack.com/api/chat.postMessage?${qs.stringify(params)}`;
     console.log(`Requesting ${url}`);
