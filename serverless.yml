@@ -29,7 +29,7 @@ provider:
   environment:
     APP_NAME: ${self:service}
     CLIENT_ID: ${env:SLACK_APP_CLIENT_ID}
-    CLIENT_SECRET: ${env:SLACK_APP_CLIENT_SECRET} 
+    CLIENT_SECRET: ${env:SLACK_APP_CLIENT_SECRET}
     INSTALL_SUCCESS_URL: https://s3-ap-southeast-2.amazonaws.com/aws-davidiog-syd-hezuo/static/success.html
     INSTALL_ERROR_URL: https://s3-ap-southeast-2.amazonaws.com/aws-davidiog-syd-hezuo/static/error.html
     NAMESPACE: ${self:custom.namespace}
@@ -37,26 +37,41 @@ provider:
     VERIFICATION_TOKEN: ${env:SLACK_APP_VERIFICATION_TOKEN}
     TEAMS_TABLE: ${self:custom.namespace}-teams
     MEMBERS_TABLE: ${self:custom.namespace}-members
+    DEVELOPERS_TABLE: ${self:custom.namespace}-developers
     ACTIVITY_TABLE: ${self:custom.namespace}-activity
     CEU_TABLE: ${self:custom.namespace}-ceu
-
+    MEMBERS_TEAM_INDEX: ${self:custom.namespace}-members-team-index
 
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:GetItem
         - dynamodb:PutItem
-      Resource: 
+        - dynamodb:Scan
+        - dynamodb:Query
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchWriteItem
+      Resource:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.SLACK_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.DEVELOPERS_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}/index/${self:provider.environment.MEMBERS_TEAM_INDEX}
     - Effect: Allow
       Action:
         - lambda:invokeFunction
-      Resource: 
+      Resource:
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-actions
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-parser
-        - arn:aws:lambda:*:*:function:${self:custom.namespace}-add-activity
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-test
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-list*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-remove*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-add*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-update*
+        - arn:aws:lambda:*:*:function:${self:custom.namespace}-describe*
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -78,12 +93,30 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  test:
-    handler: test.handler
+  list-developers:
+    handler: commands/list-developers.handler
   list-members:
     handler: commands/list-members.handler
+  list-teams:
+    handler: commands/list-teams.handler
+  list-team-members:
+    handler: commands/list-team-members.handler
+  add-team:
+    handler: commands/add-team.handler
+  add-member:
+    handler: commands/add-member.handler
+  describe-member:
+    handler: commands/describe-member.handler
+  update-member-team:
+    handler: commands/update-member-team.handler
+  remove-team:
+    handler: commands/remove-team.handler
+  remove-member:
+    handler: commands/remove-member.handler
   add-activity:
     handler: commands/add-activity.handler
+  list-activities:
+    handler: commands/list-activities.handler
   parser:
     handler: parser.handler
   actions:
@@ -100,8 +133,8 @@ functions:
       - http:
           path: install
           method: get
-  
-  
+
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -133,79 +166,102 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    HezuoMembersDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.MEMBERS_TABLE}
-        AttributeDefinitions:
-          - AttributeName: username
-            AttributeType: S
-        KeySchema:
-          - AttributeName: username
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    HezuoTeamsDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.TEAMS_TABLE}
-        AttributeDefinitions:
-          - AttributeName: team_name
-            AttributeType: S
-          - AttributeName: username
-            AttributeType: S
-        KeySchema:
-          - AttributeName: team_name
-            KeyType: HASH
-          - AttributeName: username
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    HezuoCEUDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.CEU_TABLE}
-        AttributeDefinitions:
-          - AttributeName: ceu_name
-            AttributeType: S
-        KeySchema:
-          - AttributeName: ceu_name
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    HezuoActivityDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.ACTIVITY_TABLE}
-        AttributeDefinitions:
-          - AttributeName: username
-            AttributeType: S
-          - AttributeName: updated_at
-            AttributeType: S
-        KeySchema:
-          - AttributeName: username
-            KeyType: HASH
-          - AttributeName: updated_at
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    SlackBotDynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:provider.environment.SLACK_TABLE}
-        AttributeDefinitions:
-          - AttributeName: team_id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: team_id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+     HezuoMembersDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.MEMBERS_TABLE}
+         AttributeDefinitions:
+           - AttributeName: username
+             AttributeType: S
+           - AttributeName:  teamname
+             AttributeType: S
+         KeySchema:
+           - AttributeName: username
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+         GlobalSecondaryIndexes:
+           - IndexName: ${self:provider.environment.MEMBERS_TEAM_INDEX}
+             KeySchema:
+               - AttributeName: teamname
+                 KeyType: HASH
+             Projection:
+               NonKeyAttributes:
+                 - teamname
+               ProjectionType: INCLUDE
+             ProvisionedThroughput:
+               ReadCapacityUnits: 1
+               WriteCapacityUnits: 1
+     HezuoDevelopersDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.DEVELOPERS_TABLE}
+         AttributeDefinitions:
+           - AttributeName: username
+             AttributeType: S
+         KeySchema:
+           - AttributeName: username
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoTeamsDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.TEAMS_TABLE}
+         AttributeDefinitions:
+           - AttributeName: teamname
+             AttributeType: S
+         KeySchema:
+           - AttributeName: teamname
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoCEUDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.CEU_TABLE}
+         AttributeDefinitions:
+           - AttributeName: ceuname
+             AttributeType: S
+         KeySchema:
+           - AttributeName: ceuname
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoActivityDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.ACTIVITY_TABLE}
+         AttributeDefinitions:
+           - AttributeName: username
+             AttributeType: S
+           - AttributeName: updated_at
+             AttributeType: S
+         KeySchema:
+           - AttributeName: username
+             KeyType: HASH
+           - AttributeName: updated_at
+             KeyType: RANGE
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     SlackBotDynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.SLACK_TABLE}
+         AttributeDefinitions:
+           - AttributeName: team_id
+             AttributeType: S
+         KeySchema:
+           - AttributeName: team_id
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
 #  Outputs:
 #     NewOutput:
 #       Description: "Description for the output"
