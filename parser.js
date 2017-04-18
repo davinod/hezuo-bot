@@ -81,8 +81,8 @@ const parseListMembers = () => {
     const words = command.split(' ');
     const action = words[0];
     const resource = words[1];
-
-    if (action !== "list" || resource !== 'members')
+    
+    if (action !== "list" || (resource !== 'members' && resource !== 'member'))
         throw new Error ('Bad implementation for command parseListTeams');
 
     response = {
@@ -178,6 +178,13 @@ const parseListActivity = () => {
 
 const parseAddMember = () => {
 
+    console.log('command before is ', command);
+
+    //Remove optional words and transform to lower case
+    command = command.replace(' to ', ' ')
+                     .replace(' in ', ' ')
+                     .replace(' into ', ' ').toLowerCase();
+
     //Assure that this is the right command
     const words = command.split(' ');
     const action = words[0];
@@ -259,11 +266,13 @@ const parseListDevelopers = () => {
 
 const apiProxy = () => {
   const words = command.split(' ');
-  const action = words[0];
-  const resource = words[1];
+  const action = words[0].toLowerCase();
+  const resource = words[1].toLowerCase();
   var api = null;
 
-  if (action === 'list' && resource === 'teams') {
+  if (action === 'list' && (resource === 'ceus' || resource === 'ceu')) {
+    api = 'list-ceus'
+  } else if (action === 'list' && resource === 'teams') {
     api = 'list-teams'
   } else if (action === 'add' && resource === 'team') {
     api = 'add-team'
@@ -332,10 +341,11 @@ module.exports.handler = (event, context, callback) => {
         //For new commands, please add another item to the case below resolving to your command
         //Please dont use synonyms. In order to make things simpler, parser only translate the exact command
 
-
         var resolver = null;
 
-        if (action === 'list' && resource === 'members') {
+        if (action === 'list' && (resource === 'ceus' || resource === 'ceu')) {
+            resolver = apiProxy;
+        } else if (action === 'list' && (resource === 'members' || resource === 'member')) {
             resolver = parseListMembers;
         } else if (action === 'add' && resource === 'activity') {
             resolver = parseAddActivity;
