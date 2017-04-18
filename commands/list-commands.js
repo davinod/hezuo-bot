@@ -32,9 +32,9 @@ exports.handler = (event, context, callback) => {
 
         var response = "```";
 
-        response = response.concat("\n").concat("-".repeat(19)).concat("\n");
-        response = response.concat("| List of Hezuo Commands\n");
-        response = response.concat("-".repeat(19)).concat("\n");
+        response = response.concat("\n").concat("-".repeat(26)).concat("\n");
+        response = response.concat("| List of Hezuo Commands |\n");
+        response = response.concat("-".repeat(26)).concat("\n\n");
                 
         // print all members
         data.Items.forEach(function(command){
@@ -43,11 +43,11 @@ exports.handler = (event, context, callback) => {
                                .concat(command.commandname)
                                .concat("\nSample:\n")
                                .concat(command.sample)
-                               .concat("\n");
+                               .concat("\n\n");
         });
 
         response = response.concat("\n")
-                           .concat("-".repeat(19) + "\n")
+                           .concat("-".repeat(26) + "\n")
                            .concat("Commands found: ".concat(number.toString()))
                            .concat("```");
         
