@@ -60,6 +60,7 @@ provider:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.COMMAND_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}/index/${self:provider.environment.MEMBERS_TEAM_INDEX}
     - Effect: Allow
       Action:
