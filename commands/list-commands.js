@@ -1,42 +1,57 @@
-const AWS = require('aws-sdk');
+const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 // ********************************************
-// list-developers
-// 
-// Desc  : Return the Hezuo-bot Contributors
+// list-commands
+//
+// Desc  : Return the records of command table
 // Author: Davi
 //
-// Usage: @hezuo list developers
+// Usage: @hezuo list commands
 //
 // ********************************************
 
 exports.handler = (event, context, callback) => {
 
     var params = {
-            TableName: process.env.DEVELOPERS_TABLE,
+            TableName: process.env.COMMAND_TABLE,
     };
 
-    console.log("Scanning ", process.env.DEVELOPERS_TABLE);
-    
+    console.log("Scanning ", process.env.COMMAND_TABLE);
+
     dynamodb.scan(params, function(err, data) {
         if (err)
             throw new Error (err);
-    
 
-        console.log("Scan succeeded.");
+        console.log("Scan succeeded. data is ", data);
 
-        //Get the total of members found
+        //Get the total of commands found
         number = Object.keys(data.Items).length;
 
-        response = number.toString() + " Hezuo developers found: " ;
+        console.log("tot number is ", number);
 
+        var response = "```";
+
+        response = response.concat("\n").concat("-".repeat(19)).concat("\n");
+        response = response.concat("| List of Hezuo Commands\n");
+        response = response.concat("-".repeat(19)).concat("\n");
+                
         // print all members
-        data.Items.forEach(function(developer){
-           response = response + developer.username + "; " ;
+        data.Items.forEach(function(command){
+            
+            response = response.concat("Command: ")
+                               .concat(command.commandname)
+                               .concat("\nSample:\n")
+                               .concat(command.sample)
+                               .concat("\n");
         });
 
-        console.log('response is ', response);
+        response = response.concat("\n")
+                           .concat("-".repeat(19) + "\n")
+                           .concat("Commands found: ".concat(number.toString()))
+                           .concat("```");
+        
+        console.log("response is ", response);
 
         callback(null,  response);
 
