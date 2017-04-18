@@ -72,16 +72,6 @@ provider:
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-add*
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-update*
         - arn:aws:lambda:*:*:function:${self:custom.namespace}-describe*
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
-
-# you can add statements to the Lambda function's IAM Role here
-
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
 
 # you can add packaging information here
 #package:
@@ -93,6 +83,8 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
+  list-ceus:
+    handler: commands/list-ceus.handler
   list-developers:
     handler: commands/list-developers.handler
   list-members:
