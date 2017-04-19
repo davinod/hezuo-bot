@@ -22,6 +22,9 @@ const parseAddActivity = () => {
 
     //Assure that this is the right command
     const words = command.split(' ');
+    if (words.length < 5) {
+        throw new Error ('The command is not complete. The correct format is: add activity <ceuname> to <username>');
+    }
     const action = words[0];
     const resource = words[1];
     var activityList = [];
