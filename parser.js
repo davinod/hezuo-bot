@@ -270,7 +270,9 @@ const apiProxy = () => {
   const resource = words[1].toLowerCase();
   var api = null;
 
-  if (action === 'list' && (resource === 'ceus' || resource === 'ceu')) {
+  if (action === 'list' && (resource === 'commands' || resource === 'command')) {
+    api = 'list-commands'
+  } else if (action === 'list' && (resource === 'ceus' || resource === 'ceu')) {
     api = 'list-ceus'
   } else if (action === 'list' && resource === 'teams') {
     api = 'list-teams'
@@ -343,7 +345,9 @@ module.exports.handler = (event, context, callback) => {
 
         var resolver = null;
 
-        if (action === 'list' && (resource === 'ceus' || resource === 'ceu')) {
+        if (action === 'list' && (resource === 'commands' || resource === 'command')) {
+            resolver = apiProxy;
+        } else if (action === 'list' && (resource === 'ceus' || resource === 'ceu')) {
             resolver = apiProxy;
         } else if (action === 'list' && (resource === 'members' || resource === 'member')) {
             resolver = parseListMembers;

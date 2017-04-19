@@ -40,6 +40,7 @@ provider:
     DEVELOPERS_TABLE: ${self:custom.namespace}-developers
     ACTIVITY_TABLE: ${self:custom.namespace}-activity
     CEU_TABLE: ${self:custom.namespace}-ceu
+    COMMAND_TABLE: ${self:custom.namespace}-command
     MEMBERS_TEAM_INDEX: ${self:custom.namespace}-members-team-index
 
   iamRoleStatements:
@@ -59,6 +60,7 @@ provider:
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.TEAMS_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.ACTIVITY_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.CEU_TABLE}
+        - arn:aws:dynamodb:*:*:table/${self:provider.environment.COMMAND_TABLE}
         - arn:aws:dynamodb:*:*:table/${self:provider.environment.MEMBERS_TABLE}/index/${self:provider.environment.MEMBERS_TEAM_INDEX}
     - Effect: Allow
       Action:
@@ -83,6 +85,8 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
+  list-commands:
+    handler: commands/list-commands.handler
   list-ceus:
     handler: commands/list-ceus.handler
   list-developers:
@@ -220,6 +224,19 @@ resources:
              AttributeType: S
          KeySchema:
            - AttributeName: ceuname
+             KeyType: HASH
+         ProvisionedThroughput:
+           ReadCapacityUnits: 1
+           WriteCapacityUnits: 1
+     HezuoCommandynamoDbTable:
+       Type: AWS::DynamoDB::Table
+       Properties:
+         TableName: ${self:provider.environment.COMMAND_TABLE}
+         AttributeDefinitions:
+           - AttributeName: commandname
+             AttributeType: S
+         KeySchema:
+           - AttributeName: commandname
              KeyType: HASH
          ProvisionedThroughput:
            ReadCapacityUnits: 1
